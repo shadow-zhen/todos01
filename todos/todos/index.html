@@ -15,7 +15,7 @@
 			</header>
 			<section class="main">
 				<ul class="todo-list">
-					<li>
+					<!-- <li>
 						<input class="toggle" type="checkbox">
 						<label>睡觉</label>
 						<button class="destroy"></button>
@@ -24,11 +24,29 @@
 						<input class="toggle" type="checkbox" checked>
 						<label>吃饭</label>
 						<button class="destroy"></button>
-					</li>
+					</li> -->
 				</ul>
 			</section>
 		</section>
+
+		<!-- todos模板 -->
+		<script type="text/html" id="todosTpl">
+			{{each data v i}}
+					{{if v.state === 1}}
+						<li class="completed">
+						<input class="toggle" type="checkbox" checked>
+					{{else}}
+						<li>
+						<input class="toggle" type="checkbox">
+				{{/if}}					
+					<label>{{v.content}}</label>
+					<button class="destroy" data-id="{{v._id}}"></button>
+			</li>
+			{{/each}}
+		</script>
+
 		<script src="js/jquery.js"></script>
+		<script src="./js/template-web.js"></script>
 		<script src="js/app.js"></script>
 	</body>
 </html>

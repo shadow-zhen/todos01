@@ -23,32 +23,90 @@ $(function(){
 	var $destroy = $('.todoapp .main .todo-list .destroy')
 	// 获取jQ对象任务修改按钮
 	var $toggle = $('.todoapp .main .todo-list .toggle')
+
+
+	//进入页面，发送ajax请求，获取todos任务列表，并渲染到页面中
+	function render() {
+		$.ajax({
+			type: 'get',
+			url: 'http://localhost:3000/todos',
+			success: function (res) {
+				console.log(res)
+				if(res.code === 200) {
+					let htmlStr = template('todosTpl', res)
+					$ul.html(htmlStr)
+				}
+			}
+		})
+	}
+
+	render()
 	
-	// 功能1：在输入框中输入任务内容，按回车键时添加一个任务
+	// 功能1：在输入框中输入任务内容，按回车键时添加一个任务,发送ajax请求
 	$document.on('keydown', function (e) {
 		// console.log(e.keyCode)
 		if(e.keyCode === 13) {
-			var txt = $newTodo.val().trim()
+			let txt = $newTodo.val().trim()
 			if(!txt) {
 				return alert('任务名称不能为空')
 			}
-			// 添加到任务列表的最顶部，调用creatList方法
-			createList(txt);
+			//当任务内容不为空时，发送Ajax请求
+			$.ajax({
+				type: 'get',
+				url: 'http://localhost:3000/todos-add',
+				data: {
+					content: txt,
+					state: 0
+				},
+				success: function (res) {
+					// console.log(res)
+					if(res.code === 200) {
+						render()
+					}
+				}
+			})
 			// 添加完成后，需要清空原来的内容
 			$newTodo.val('')
 		}
 	})
 
 	// 功能2：任务删除功能，点击任务中的删除按钮，能够删除当前任务
-	$ul.on('click', $destroy, function (e) {
-		if(e.target.tagName === 'BUTTON') {
-			$(e.target).parent().remove()	
-		}
+	$ul.on('click', '.destroy', function (e) {
+		$.ajax({
+			type: 'get',
+			url: 'http://localhost:3000/todos-del',
+			data: {
+				id: $(this).data('id')
+			},
+			success: function (res) {
+				// console.log(res)
+				if(res.code === 200) {
+					render()
+				}
+			}
+		})
 	})
 
 	// 功能3：任务状态修改功能，点击checkbox，要求能够修改任务的完成状态。
 	$ul.on('click', '.toggle', function () {
 		$(this).prop('checked', $(this).prop('checked')).parent().toggleClass('completed')
+		let state = $(this).parent().hasClass('completed') ? 1 : 0
+		let content = $(this).next().text()
+		$.ajax({
+			type: 'get',
+			url: 'http://localhost:3000/todos-mod',
+			data: {
+				id: $(this).nextAll('button').data('id'),
+				content,
+				state
+			},
+			success: function (res) {
+				console.log(res)
+				if(res.code === 200) {
+					render()
+				}
+			}
+		})
 	})
 
 	function createList(value) {
